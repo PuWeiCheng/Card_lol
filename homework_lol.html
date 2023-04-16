@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+    <style>
+        *{
+            margin: 0px;
+            padding: 0px;
+        }
+        /* 導入bootstrap 5.3*/
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- 標題 -->
+    <div class="container" style="height: 150px; background-color: cornflowerblue;">
+        <h1 style="text-align: center; padding: 40px 0px; font-weight: bold;">LOL英雄聯盟圖鑑</h1>
+    </div>
+    <!-- 按鈕打開 -->
+    <div class="open" style="padding: 30px 0px 0px 0px;">
+        <button type="button" class="btn btn-secondary btn-lg" id="open_card">打開圖鑑</button>
+    </div>
+    <!-- 卡片顯示 -->
+    <div class="row">
+
+    </div>
+    <!-- template做卡片版型 -->
+    <template id="card_tem">
+        <div class="card" style="width: 18rem; margin: 0px 10px; ">
+            <img src="" class="card-img-top" style="width:100%;" alt="...">
+            <div class="card-body" style="background-color: orange;">
+                <h5 class="card-title" style="background: black; color: white; font-weight: bold;border-radius: 2ch; padding: 0px 10px;"></h5>
+                <p class="card-text"></p>
+                <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">詳細</a>
+            </div>
+        </div>
+    </template>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: cornflowerblue;">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel"></h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- 內容寫入 -->
+                <div class="modal-body">
+                    <img id="img2" style="width:100%;">
+                    <p id="hp"></p>
+                    <p id="speed"></p>
+                    <p id="amor"></p>
+                    <p id="block"></p>
+                    <p id="range"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 導入bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"
+        integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"
+        integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ"
+        crossorigin="anonymous"></script>
+
+    <script>
+        // 得到row顯示
+        let row =document.querySelector('.row');
+        //定義template
+        let card_temp =document.querySelector('#card_tem');
+        //定義JSON轉換需要資料
+        let champion ={};
+        let heroobject ={}, heroarray =[];
+        // 定義button打開圖鑑
+        let open_card =document.querySelector('#open_card');
+
+        //url JSON資料
+        const url ="https://ddragon.leagueoflegends.com/cdn/10.22.1/data/zh_TW/champion.json";
+        //url 錯誤資料
+        const url404 ="https://ddragon.leagueoflegends.com/cdn/10.22.1/data/zh_TW/12345.json";
+
+        //主函式
+        window.onload =function(){
+            // fetchJson(url);
+            //按下button運行function
+            open_card.addEventListener("click",function(){
+                fetchJson(url);
+            });
+        }
+        
+
+        //副函式 fetch讀取資料和防呆
+        function fetchJson(uri){
+            fetch(uri)
+                .then(function(response){
+                    if(!response.ok){
+                        const err =new Error(`找不到資源檔 : ${uri}`);
+                        err.response =response;
+                        throw err;
+                    }
+                    else{
+                        return response.json();
+                    }
+                })
+                .then(result =>{
+                    champion =result;
+
+                    heroobject =champion.data;
+
+                    heroarray =Object.keys(heroobject);
+                    let valuearray =Object.keys(heroobject);
+
+                    heroarray.forEach((heroname,index)=>{
+                        let hero =heroobject[heroname];
+                        
+
+                        // console.log(`${hero.id},${hero.name},${hero.blurb},${hero.stats.hp},${hero.stats.movespeed},
+                        // ${hero.stats.armor},${hero.stats.spellblock},${hero.stats.attackrange}`);
+
+                        //讀取資料用function顯示在row欄位
+                        row.append(getCard(index,hero.id,hero.name,hero.blurb,hero.stats.hp,hero.stats.movespeed,hero.stats.armor,
+                        hero.stats.spellblock,hero.stats.attackrange));
+
+                    });
+                    
+
+                })
+                .catch(ex =>{
+                    console.dir(ex);
+                    console.log(ex.response);
+                    document.body.append(ex.message);
+                });
+        }
+
+        //副函式用模板寫入需要用的卡片
+        function getCard(indexs,keyname,name,des,hp,speed,amor,block,range){
+            let clonecard =card_temp.content.cloneNode(true);
+            clonecard.querySelector("img").src=`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${keyname}_0.jpg`;
+            clonecard.querySelector("h5").innerText=`${indexs}:${keyname}-${name}`;
+            clonecard.querySelector("p").innerText=des;
+            clonecard.querySelector(".btn").addEventListener("click",function(){
+                let modal =document.querySelector('#exampleModal');
+
+                modal.querySelector("h1").innerHTML =`${keyname}-${name}`;
+                modal.querySelector('#img2').src=`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${keyname}_0.jpg`;
+                modal.querySelector('#hp').innerHTML= `HP:${hp}`;
+                modal.querySelector('#speed').innerHTML= `Move Speed:${speed}`;
+                modal.querySelector('#amor').innerHTML= `Armor:${amor}`;
+                modal.querySelector('#block').innerHTML= `Spell Block:${block}`;
+                modal.querySelector('#range').innerHTML= `AttackRange:${range}`;
+            });
+
+            return clonecard;
+        }
+
+
+    </script>
+
+
+
+
+</body>
+
+</html>
