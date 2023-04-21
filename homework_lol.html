@@ -130,7 +130,7 @@
                         // ${hero.stats.armor},${hero.stats.spellblock},${hero.stats.attackrange}`);
 
                         //讀取資料用function顯示在row欄位
-                        row.append(getCard(index,hero.id,hero.name,hero.blurb,hero.stats.hp,hero.stats.movespeed,hero.stats.armor,
+                        row.append(getCard(index,hero.id,hero.name,hero.blurb.substr(0,40),hero.stats.hp,hero.stats.movespeed,hero.stats.armor,
                         hero.stats.spellblock,hero.stats.attackrange));
 
                     });
@@ -149,7 +149,7 @@
             let clonecard =card_temp.content.cloneNode(true);
             clonecard.querySelector("img").src=`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${keyname}_0.jpg`;
             clonecard.querySelector("h5").innerText=`${indexs}:${keyname}-${name}`;
-            clonecard.querySelector("p").innerText=des;
+            clonecard.querySelector("p").innerText=`${des}...`;
             clonecard.querySelector(".btn").addEventListener("click",function(){
                 let modal =document.querySelector('#exampleModal');
 
